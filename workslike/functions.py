@@ -1,29 +1,31 @@
 import boto3
 import json
 
-def get_Credentials(filename):
-	with open(filename) as json_file:
-    data = json.load(json_file)
-    for p in data['people']:
-        print('Name: ' + p['name'])
-        print('Website: ' + p['website'])
-        print('From: ' + p['from'])
-        print('')
+# get AWS credentials
+# input: filepath
+# output: AWS ID, AWS key
+def get_AWS_Credentials(filepath):
+	with open(filepath) as f:
+		data = json.load(f)
+		ACCESS_ID = data["ACCESS_ID"]
+		ACCESS_KEY = data["ACCESS_KEY"]
 	return ACCESS_ID, ACCESS_KEY
 
 # call AWS to translate text
+# input: text to translate (EN)
+# output: translated text (FR)
 def translate_AWS(input_text):
-	translate = boto3.client(service_name='translate', aws_access_key_id=ACCESS_ID, aws_secret_access_key= ACCESS_KEY, region_name='eu-west-2', use_ssl=True)
-	result = translate.translate_text(Text="Hello, World", 
-	            SourceLanguageCode="en", TargetLanguageCode="fr")
-	print('TranslatedText: ' + result.get('TranslatedText'))
-	print('SourceLanguageCode: ' + result.get('SourceLanguageCode'))
-	print('TargetLanguageCode: ' + result.get('TargetLanguageCode'))
-
-
+	access_id, access_key = get_AWS_Credentials("credentials.json")
+	translate = boto3.client(service_name ='translate', aws_access_key_id = access_id, 
+							aws_secret_access_key = access_key, region_name ='eu-west-2', 
+							use_ssl=True)
+	result = translate.translate_text(Text=input_text, SourceLanguageCode="en", 
+									TargetLanguageCode="fr")
+	return result.get('TranslatedText')
 
 def main():
-  print("Hello World!")
+	output = translate_AWS("Hello, my name is John.")
+	print(output)
   
 if __name__== "__main__":
   main()
